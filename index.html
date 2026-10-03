@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en" class="locked">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Links</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#128279;</text></svg>">
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --text:#16181d; --muted:#6b7280;
+    --line:#e4e6eb; --accent:#2563eb;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0f1115; --card:#171a21; --text:#e8eaed; --muted:#9aa1ab; --line:#252a33; --accent:#6ea8fe; }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    padding:40px 16px 60px; -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:600px;margin:0 auto}
+
+  h1{font-size:1.35rem;margin:0 0 18px;letter-spacing:-.01em}
+  h1 span{color:var(--muted);font-weight:400}
+
+  /* add row */
+  form{display:flex;gap:8px;flex-wrap:wrap}
+  input[type=text]{
+    flex:1 1 200px; min-width:0; font-size:1rem; color:var(--text); background:var(--card);
+    border:1px solid var(--line); border-radius:10px; padding:13px 14px; font-family:inherit;
+  }
+  select{
+    flex:0 1 auto; font-size:.9rem; color:var(--text); background:var(--card); cursor:pointer;
+    border:1px solid var(--line); border-radius:10px; padding:13px 10px; font-family:inherit; max-width:180px;
+  }
+  input[type=text]:focus, select:focus{outline:none;border-color:var(--accent)}
+  input[type=text].bad{border-color:#e5484d;animation:shake .3s}
+  @keyframes shake{ 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+  button{
+    font:inherit; font-weight:600; cursor:pointer; border:0; border-radius:10px;
+    background:var(--accent); color:#fff; padding:13px 18px;
+  }
+  button:active{transform:scale(.98)}
+  .hint{font-size:.82rem;color:var(--muted);margin:8px 2px 0;height:1.1em}
+
+  /* category filter chips */
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+  .chip{
+    font:inherit;font-size:.8rem;font-weight:500;cursor:pointer;background:var(--card);
+    color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:5px 11px;
+  }
+  .chip:hover{color:var(--text);border-color:var(--muted)}
+  .chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .chip b{font-weight:600;opacity:.65;margin-left:4px}
+
+  /* list */
+  ul{list-style:none;margin:18px 0 0;padding:0}
+  .group + .group{margin-top:22px}
+  .group > h2{
+    font-size:.75rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);
+    margin:0 0 8px;display:flex;align-items:center;gap:9px;font-weight:600;
+  }
+  .group > h2 em{font-style:normal;font-weight:500;opacity:.7}
+  .group > h2::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  li{
+    display:flex; align-items:center; gap:11px; background:var(--card);
+    border:1px solid var(--line); border-radius:10px; padding:11px 12px; margin-bottom:7px;
+  }
+  li.flash{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--card))}
+  .badge{
+    flex:0 0 auto;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
+    font-weight:700;font-size:.85rem;background:var(--line);color:var(--muted);
+  }
+  .info{flex:1;min-width:0}
+  .name{display:block;font-weight:600;font-size:.94rem;text-decoration:none;color:inherit;
+        white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .name:hover{color:var(--accent);text-decoration:underline}
+  .url{display:block;font-size:.76rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .del{
+    flex:0 0 auto;background:none;border:0;color:var(--muted);font-size:1.25rem;line-height:1;
+    padding:2px 6px;border-radius:6px;cursor:pointer;
+  }
+  .del:hover{color:#e5484d;background:rgba(229,72,77,.12)}
+
+  .empty{color:var(--muted);text-align:center;font-size:.9rem;padding:30px 0}
+
+  footer{
+    margin-top:30px;padding-top:16px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+    font-size:.8rem;color:var(--muted);flex-wrap:wrap;
+  }
+  footer button{
+    background:none;color:var(--muted);font-weight:500;padding:4px 8px;border-radius:6px;font-size:.8rem;
+  }
+  footer button:hover{color:var(--accent);background:rgba(37,99,235,.1)}
+  footer button.on{color:var(--accent)}
+  /* little dot: your links changed since the last export */
+  footer button.stale::after{
+    content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
+    background:#e5a00d;margin-left:5px;vertical-align:middle;
+  }
+
+  /* ---------- security panel (Touch ID / Face ID, passcode) ---------- */
+  .panel{
+    display:none;margin-top:14px;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:16px 14px;font-size:.86rem;
+  }
+  .panel.open{display:block}
+  .panel h3{margin:0 0 4px;font-size:.86rem;display:flex;align-items:center;gap:8px}
+  .panel h3 svg{width:17px;height:17px;flex:0 0 auto}
+  .panel p{margin:0 0 12px;color:var(--muted);line-height:1.45}
+  .panel .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .panel button{
+    background:var(--accent);color:#fff;padding:10px 14px;font-size:.86rem;border-radius:9px;
+  }
+  .panel button.ghost{
+    background:none;color:var(--muted);border:1px solid var(--line);
+  }
+  .panel button.ghost:hover{color:var(--text);border-color:var(--muted)}
+  .panel .state{font-size:.82rem;color:var(--muted)}
+  .panel .state b{color:var(--text);font-weight:600}
+  .panel pre{
+    margin:10px 0 0;padding:10px;background:var(--bg);border:1px solid var(--line);
+    border-radius:8px;font-size:.72rem;overflow-x:auto;white-space:pre-wrap;word-break:break-all;
+  }
+  .panel .msg{margin:10px 0 0;font-size:.82rem;min-height:1.1em}
+  .panel .msg.bad{color:#e5484d}
+  .panel .msg.ok{color:#12a150}
+
+  /* ---------- passcode lock ---------- */
+  .lock{display:none}
+  .locked .lock{position:fixed;inset:0;z-index:10;display:grid;place-items:center;background:var(--bg);padding:20px}
+  .locked .app{display:none}
+  .lockbox{
+    width:100%;max-width:340px;text-align:center;background:var(--card);
+    border:1px solid var(--line);border-radius:14px;padding:26px 22px;
+  }
+  .lockico{font-size:1.9rem;line-height:1}
+  .lockbox h2{margin:12px 0 4px;font-size:1.1rem}
+  .lockbox p{margin:0 0 16px;font-size:.86rem;color:var(--muted)}
+  .lockbox input{
+    width:100%;font:inherit;font-size:1rem;text-align:center;color:var(--text);
+    background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+  }
+  .lockbox input:focus{outline:none;border-color:var(--accent)}
+  .lockbox input.bad{border-color:#e5484d;animation:shake .3s}
+  .lockbox button{width:100%;margin-top:10px}
+  .lockbox .lockerr{margin:10px 0 0;height:1.1em;font-size:.82rem;color:#e5484d}
+  /* biometric button on the lock screen */
+  .lockbox .biobtn{
+    display:flex;align-items:center;justify-content:center;gap:9px;margin-top:10px;
+    background:var(--bg);color:var(--text);border:1px solid var(--line);font-weight:600;
+  }
+  .lockbox .biobtn:hover{border-color:var(--accent);color:var(--accent)}
+  .lockbox .biobtn svg{width:19px;height:19px;flex:0 0 auto}
+  .lockbox .biobtn[disabled]{opacity:.55}
+  .locksep{display:flex;align-items:center;gap:10px;margin:16px 0 0;color:var(--muted);font-size:.75rem}
+  .locksep::before,.locksep::after{content:"";flex:1;height:1px;background:var(--line)}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+
+<!-- fingerprint glyph, reused by the lock screen and the security panel -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="ico-finger" viewBox="0 0 24 24">
+    <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M5.2 8.6C6.5 6 9 4.2 12 4.2s5.5 1.8 6.8 4.4"/>
+      <path d="M3.2 13.2c0-1.1-.1-2-.1-3C3.1 6.5 7.1 3.2 12 3.2s8.9 3.3 8.9 7"/>
+      <path d="M7.4 18.6c-.9-1.8-1.5-4-1.5-6.3 0-2.9 1.9-5.3 4.3-6"/>
+      <path d="M16.6 12.3c0-.1 0-.2 0-.3 0-2.4-1.6-4.4-3.7-4.9"/>
+      <path d="M12 8.9c-1.9.4-3.3 2.1-3.3 4.1 0 3 .8 5.8 2.1 8.1"/>
+      <path d="M12.9 8.9c1.5.5 2.6 2 2.6 3.7 0 3.6.6 6.9 1.7 9.9"/>
+      <path d="M18.9 20.4c-1-2.7-1.5-5.4-1.5-8.1"/>
+      <path d="M8.6 21.3c-.4-.8-.7-1.6-1-2.5"/>
+    </g>
+  </symbol>
+</defs></svg>
+
+<!-- passcode / biometric screen -->
+<div class="lock" id="lock">
+  <form class="lockbox" id="lockForm" autocomplete="off">
+    <div class="lockico" aria-hidden="true">&#128274;</div>
+    <h2>My Links</h2>
+    <p>Enter the passcode to open.</p>
+    <input id="passInput" type="password" placeholder="Passcode" aria-label="Passcode" autocomplete="off">
+    <button type="submit">Unlock</button>
+
+    <div class="locksep" id="bioSep" hidden>or</div>
+    <button type="button" class="biobtn" id="bioUnlockBtn" hidden>
+      <svg aria-hidden="true"><use href="#ico-finger"/></svg>
+      <span id="bioUnlockLabel">Touch ID / Face ID</span>
+    </button>
+
+    <p class="lockerr" id="lockErr" role="alert"></p>
+  </form>
+</div>
+
+<div class="wrap app" id="app">
+
+  <h1>My Links <span id="count"></span></h1>
+
+  <form id="form" autocomplete="off">
+    <input id="input" type="text" placeholder="Paste a link…" aria-label="Paste a link" spellcheck="false">
+    <select id="catSelect" aria-label="Category"></select>
+    <button type="submit">Add</button>
+  </form>
+  <p class="hint" id="hint"></p>
+
+  <div class="chips" id="chips"></div>
+  <div id="groups"></div>
+  <p class="empty" id="empty">Nothing saved yet — paste a link above.</p>
+
+  <!-- Touch ID / Face ID + passcode settings -->
+  <div class="panel" id="secPanel" aria-live="polite">
+    <h3><svg aria-hidden="true"><use href="#ico-finger"/></svg> <span id="secTitle">Touch ID / Face ID</span></h3>
+    <p id="secDesc">Unlock this page with your fingerprint or face instead of typing the passcode.</p>
+    <div class="row">
+      <button type="button" id="bioSetupBtn" hidden>Turn on</button>
+      <button type="button" id="bioOffBtn" class="ghost" hidden>Turn off</button>
+      <span class="state" id="bioState"></span>
+    </div>
+    <p class="msg" id="secMsg" role="status"></p>
+
+    <h3 style="margin-top:20px">&#128273; Passcode</h3>
+    <p>Stored as a hash in this file. Type a new one to get the line to paste into <code>index.html</code>.</p>
+    <div class="row">
+      <input id="newPass" type="text" placeholder="New passcode" aria-label="New passcode"
+             autocomplete="off" style="flex:1 1 160px">
+      <button type="button" id="hashBtn" class="ghost">Make hash</button>
+    </div>
+    <pre id="hashOut" hidden></pre>
+  </div>
+
+  <footer>
+    <span id="note"></span>
+    <span>
+      <button type="button" id="exportBtn">Export</button>
+      <button type="button" id="importBtn">Import</button>
+      <button type="button" id="secBtn">Security</button>
+      <button type="button" id="lockBtn">Lock</button>
+      <input type="file" id="fileInput" accept=".txt,text/plain" hidden>
+    </span>
+  </footer>
+
+</div>
+
+<script>
+/* -------------------------------------------------------------------------
+   My Links — one file, no dependencies.
+
+   Links live in this browser's storage, NOT in this file:
+     · localStorage  key "myLinks"   (primary, same key as the old version)
+     · IndexedDB     db "myLinksDB"  (a second copy, used to repair the first)
+   So replacing this file with a newer version does NOT touch your links,
+   as long as the address stays the same (https://<you>.github.io).
+
+   Unlock: passcode, or Touch ID / Face ID via WebAuthn once you turn it on.
+------------------------------------------------------------------------- */
+
+// The categories offered in the dropdown. Add or rename freely.
+const PRESETS = ['Movies', 'Anime', 'AI', 'Free Tools', 'Gaming', 'Music', 'Learning', 'Reading', 'Shopping', 'Other'];
+
+// localStorage can be blocked (private mode, sandboxed preview) — fall back
+// to memory so the page still works, it just forgets on reload.
+const store = (() => {
+  try {
+    localStorage.setItem('__t', '1');
+    localStorage.removeItem('__t');
+    return localStorage;
+  } catch (e) {
+    const mem = {};
+    return {
+      getItem: k => (k in mem ? mem[k] : null),
+      setItem: (k, v) => { mem[k] = String(v); },
+      removeItem: k => { delete mem[k]; },
+    };
+  }
+})();
+
+const KEY        = 'myLinks';           // <-- unchanged from v1, so your links carry over
+const CAT_KEY    = 'myLinksLastCat';
+const CHANGED_AT = 'myLinksChangedAt';  // when the list last changed
+const EXPORT_AT  = 'myLinksExportedAt'; // when you last downloaded urls.txt
+const BIO_KEY    = 'myLinksBioCred';    // id of the Touch ID / Face ID credential
+
+let links = [];        // [{ url, cat, added }]
+let filter = 'All';    // 'All' or a category name
+
+const $ = id => document.getElementById(id);
+const groupsEl = $('groups'), inputEl = $('input'), hintEl = $('hint'),
+      chipsEl = $('chips'), selectEl = $('catSelect'),
+      passInput = $('passInput'), lockErr = $('lockErr'), lockForm = $('lockForm'),
+      bioUnlockBtn = $('bioUnlockBtn'), bioSep = $('bioSep'), bioState = $('bioState'),
+      bioSetupBtn = $('bioSetupBtn'), bioOffBtn = $('bioOffBtn'),
+      secMsg = $('secMsg'), secPanel = $('secPanel'), secBtn = $('secBtn');
+
+/* ---------- second copy of the list (IndexedDB) ---------- */
+/* Safari on iPad can drop a site's localStorage if you do not visit it for a
+   week. IndexedDB is a separate store; keeping a copy there lets the page put
+   your links back if the first copy disappears. It is only ever used when the
+   main copy is missing or unreadable, so deleting a link stays deleted. */
+
+const IDB_NAME = 'myLinksDB', IDB_STORE = 'kv', IDB_ITEM = 'links';
+
+function idbOpen() {
+  return new Promise((resolve, reject) => {
+    if (!('indexedDB' in self)) return reject(new Error('no indexedDB'));
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => {
+      if (!req.result.objectStoreNames.contains(IDB_STORE)) req.result.createObjectStore(IDB_STORE);
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error || new Error('open failed'));
+    req.onblocked = () => reject(new Error('blocked'));
+  });
+}
+
+async function idbGet() {
+  try {
+    const db = await idbOpen();
+    return await new Promise((resolve, reject) => {
+      const r = db.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE).get(IDB_ITEM);
+      r.onsuccess = () => resolve(r.result || null);
+      r.onerror = () => reject(r.error);
+    });
+  } catch (e) { return null; }
+}
+
+async function idbPut(list) {
+  try {
+    const db = await idbOpen();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readwrite');
+      tx.objectStore(IDB_STORE).put(list, IDB_ITEM);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error || new Error('aborted'));
+    });
+  } catch (e) { /* second copy is best-effort */ }
+}
+
+/* ---------- saving / loading ---------- */
+
+// Reads the main copy; repairs it from the second copy if it is gone or broken.
+// Returns how many links were repaired back, 0 if nothing needed fixing.
+async function load() {
+  const raw = store.getItem(KEY);
+  let main = null;
+
+  if (raw !== null && raw !== undefined) {
+    try {
+      const data = JSON.parse(raw);
+      if (Array.isArray(data)) main = data;      // a broken read leaves main = null
+    } catch (e) { main = null; }
+  }
+
+  if (main) {
+    links = main;
+    idbPut(links);                                // keep the second copy fresh
+  } else {
+    const backup = await idbGet();
+    if (Array.isArray(backup) && backup.length) {
+      links = backup;
+      save();                                     // write the main copy back
+      return backup.length;
+    }
+    links = [];
+  }
+
+  links.forEach(l => { if (!l.cat) l.cat = 'Other'; });   // older entries had no category
+  return 0;
+}
+
+function save() {
+  try {
+    store.setItem(KEY, JSON.stringify(links));
+    store.setItem(CHANGED_AT, String(Date.now()));
+  } catch (e) {}
+  idbPut(links);
+}
+
+/* ---------- url helpers ---------- */
+
+// Turn "github.com" into "https://github.com/". Returns null if it is not a link.
+function normalize(raw) {
+  let text = String(raw || '').trim();
+  if (!text) return null;
+  if (!/^https?:\/\//i.test(text)) {
+    if (/^[a-z][a-z0-9+.-]*:/i.test(text)) return null;   // javascript:, mailto:, …
+    text = 'https://' + text;
+  }
+  try {
+    const url = new URL(text);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+    if (!url.hostname.includes('.')) return null;
+    return url.href;
+  } catch (e) {
+    return null;
+  }
+}
+
+function prettyName(url) {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, '');
+    return host.charAt(0).toUpperCase() + host.slice(1);
+  } catch (e) {
+    return url;
+  }
+}
+
+function prettyUrl(url) {
+  return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+}
+
+/* ---------- category order ---------- */
+
+// Category names in a stable order: your presets first, then any custom ones.
+function catOrder() {
+  const used = [...new Set(links.map(l => l.cat))];
+  const known = PRESETS.filter(p => used.includes(p));
+  const extra = used.filter(c => !PRESETS.includes(c));
+  return known.concat(extra);
+}
+
+/* ---------- rendering ---------- */
+
+function renderChips() {
+  const order = catOrder();
+  chipsEl.innerHTML = '';
+  if (!order.length) return;
+
+  const make = (label, value, count) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip' + (filter === value ? ' on' : '');
+    b.textContent = label;
+    if (count != null) {
+      const n = document.createElement('b');
+      n.textContent = count;
+      b.append(n);
+    }
+    b.onclick = () => { filter = value; render(); };
+    return b;
+  };
+
+  chipsEl.append(make('All', 'All', links.length));
+  order.forEach(cat => make(cat, cat, links.filter(l => l.cat === cat).length));
+}
+
+function row(link, flashUrl) {
+  const li = document.createElement('li');
+  if (flashUrl && link.url === flashUrl) li.className = 'flash';
+
+  const badge = document.createElement('span');
+  badge.className = 'badge';
+  badge.textContent = prettyName(link.url).charAt(0).toUpperCase();
+
+  const info = document.createElement('div');
+  info.className = 'info';
+
+  const a = document.createElement('a');
+  a.className = 'name';
+  a.href = link.url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.textContent = prettyName(link.url);
+
+  const small = document.createElement('span');
+  small.className = 'url';
+  small.textContent = prettyUrl(link.url);
+
+  info.append(a, small);
+
+  const del = document.createElement('button');
+  del.className = 'del';
+  del.type = 'button';
+  del.title = 'Remove';
+  del.setAttribute('aria-label', 'Remove ' + link.url);
+  del.textContent = '\u00d7';
+  del.onclick = () => {
+    links = links.filter(l => l.url !== link.url);
+    if (filter !== 'All' && !links.some(l => l.cat === filter)) filter = 'All';
+    save();
+    render();
+  };
+
+  li.append(badge, info, del);
+  return li;
+}
+
+// "just now" · "8m ago" · "3h ago" · "4d ago" · "12 Mar"
+function ago(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s / 60) + 'm ago';
+  if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+  if (s < 86400 * 30) return Math.floor(s / 86400) + 'd ago';
+  return new Date(ts).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+}
+
+function render(flashUrl) {
+  renderChips();
+  groupsEl.innerHTML = '';
+
+  const order = catOrder().filter(c => filter === 'All' || c === filter);
+
+  order.forEach(cat => {
+    const items = links.filter(l => l.cat === cat);
+    if (!items.length) return;
+
+    const group = document.createElement('div');
+    group.className = 'group';
+
+    const h2 = document.createElement('h2');
+    h2.append(document.createTextNode(cat));
+    const em = document.createElement('em');
+    em.textContent = items.length;
+    h2.append(em);
+    group.append(h2);
+
+    const ul = document.createElement('ul');
+    items.forEach(l => ul.append(row(l, flashUrl)));
+    group.append(ul);
+
+    groupsEl.append(group);
+  });
+
+  $('empty').style.display = links.length ? 'none' : 'block';
+  $('count').textContent = links.length ? links.length : '';
+
+  // footer note + a dot on Export while there are changes you have not exported
+  const changed = Number(store.getItem(CHANGED_AT) || 0);
+  const exported = Number(store.getItem(EXPORT_AT) || 0);
+  let note = '';
+  if (links.length) {
+    note = links.length + (links.length === 1 ? ' link' : ' links') + ' in this browser';
+    note += ' \u00b7 exported ' + (exported ? ago(exported) : 'never');
+  }
+  $('note').textContent = note;
+  $('exportBtn').classList.toggle('stale', links.length > 0 && changed > exported);
+}
+
+function hint(text, bad) {
+  hintEl.textContent = text || '';
+  hintEl.style.color = bad ? '#e5484d' : '';
+}
+
+/* ---------- the category dropdown ---------- */
+
+function fillSelect() {
+  const order = catOrder();
+  const extras = order.filter(c => !PRESETS.includes(c));
+  const remembered = store.getItem(CAT_KEY);
+
+  selectEl.innerHTML = '';
+  extras.concat(PRESETS).forEach(cat => {
+    const o = document.createElement('option');
+    o.value = cat;
+    o.textContent = cat;
+    selectEl.append(o);
+  });
+
+  const newOpt = document.createElement('option');
+  newOpt.value = '__new';
+  newOpt.textContent = '+ New category…';
+  selectEl.append(newOpt);
+
+  selectEl.value = (remembered && [...selectEl.options].some(o => o.value === remembered))
+    ? remembered
+    : 'Other';
+}
+
+selectEl.addEventListener('change', () => {
+  if (selectEl.value !== '__new') {
+    try { store.setItem(CAT_KEY, selectEl.value); } catch (e) {}
+    return;
+  }
+  const name = (window.prompt('Name of the new category?') || '').trim();
+  if (!name) { selectEl.value = 'Other'; return; }
+  const o = document.createElement('option');
+  o.value = name;
+  o.textContent = name;
+  selectEl.insertBefore(o, selectEl.firstChild);
+  selectEl.value = name;
+  try { store.setItem(CAT_KEY, name); } catch (e) {}
+});
+
+/* ---------- adding ---------- */
+
+$('form').addEventListener('submit', event => {
+  event.preventDefault();
+
+  const url = normalize(inputEl.value);
+
+  if (!url) {
+    inputEl.classList.add('bad');
+    setTimeout(() => inputEl.classList.remove('bad'), 400);
+    hint('That does not look like a web address.', true);
+    return;
+  }
+
+  const cat = selectEl.value === '__new' ? 'Other' : selectEl.value;
+
+  if (links.some(l => l.url === url)) {
+    hint('Already saved.', false);
+    inputEl.value = '';
+    filter = 'All';
+    render(url);
+    return;
+  }
+
+  links.unshift({ url, cat, added: new Date().toISOString() });
+  save();
+  inputEl.value = '';
+  hint('Saved to ' + cat + '.', false);
+  filter = 'All';
+  render(url);
+});
+
+/* ---------- export / import ---------- */
+
+function exportText() {
+  const out = [];
+  catOrder().forEach(cat => {
+    out.push('', '# ' + cat);
+    links.filter(l => l.cat === cat).forEach(l => out.push(l.url));
+  });
+  return out.join('\n').replace(/^\n+/, '') + '\n';
+}
+
+// "# Movies" sets the category for the lines after it. Bare links go to Other.
+function parseText(text) {
+  const found = [];
+  let cat = 'Other';
+  String(text).split(/\r?\n/).forEach(line => {
+    const t = line.trim();
+    if (!t) return;
+    if (t.charAt(0) === '#') { cat = t.slice(1).trim() || 'Other'; return; }
+    const url = normalize(t);
+    if (url) found.push({ url, cat });
+  });
+  return found;
+}
+
+$('exportBtn').onclick = () => {
+  if (!links.length) { hint('Nothing to export yet.', false); return; }
+  const blob = new Blob([exportText()], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'urls.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  try { store.setItem(EXPORT_AT, String(Date.now())); } catch (e) {}
+  hint('Downloaded urls.txt — keep it somewhere safe.', false);
+  render();
+};
+
+$('importBtn').onclick = () => $('fileInput').click();
+
+$('fileInput').onchange = event => {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let added = 0;
+    parseText(reader.result).forEach(item => {
+      if (!links.some(l => l.url === item.url)) {
+        links.push({ url: item.url, cat: item.cat, added: new Date().toISOString() });
+        added++;
+      }
+    });
+    save();
+    filter = 'All';
+    render();
+    hint(added ? 'Imported ' + added + ' link' + (added === 1 ? '' : 's') + '.' : 'Nothing new to import.', false);
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+};
+
+/* ---------- passcode ---------- */
+
+// The passcode itself is not stored here, only a hash of it.
+// To change it: open this page, tap Security in the footer, type the new
+// passcode, tap "Make hash", then paste the line below into this file.
+const PASS_HASH = '4978597925985454';
+const UNLOCK_KEY = 'myLinksUnlocked';
+
+// cyrb53 — small hash that needs no crypto API, so it works on file:// too
+function cyrb53(str) {
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0, ch; i < str.length; i++) {
+    ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
+  h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
+  h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+}
+
+// Spacing and letter case do not matter: "Foo  Bar" is the same as "foo bar"
+function normalizePass(text) {
+  return String(text || '').toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+function hashPass(text) {
+  return String(cyrb53(normalizePass(text)));
+}
+
+// sessionStorage (like localStorage) can be blocked — fall back to memory
+const session = (() => {
+  try {
+    sessionStorage.setItem('__t', '1');
+    sessionStorage.removeItem('__t');
+    return sessionStorage;
+  } catch (e) {
+    const mem = {};
+    return {
+      getItem: k => (k in mem ? mem[k] : null),
+      setItem: (k, v) => { mem[k] = String(v); },
+      removeItem: k => { delete mem[k]; },
+    };
+  }
+})();
+
+function isUnlocked() {
+  return session.getItem(UNLOCK_KEY) === '1';
+}
+
+let pendingNote = '';   // shown once the page is open
+
+function unlock() {
+  document.documentElement.classList.remove('locked');
+  session.setItem(UNLOCK_KEY, '1');
+  if (pendingNote) { hint(pendingNote, false); pendingNote = ''; }
+  inputEl.focus();
+}
+
+function showLock() {
+  document.documentElement.classList.add('locked');
+  session.removeItem(UNLOCK_KEY);
+  passInput.value = '';
+  lockErr.textContent = '';
+  paintLockScreen();
+  passInput.focus();
+}
+
+lockForm.addEventListener('submit', event => {
+  event.preventDefault();
+  if (hashPass(passInput.value) === PASS_HASH) {
+    unlock();
+  } else {
+    passInput.classList.add('bad');
+    setTimeout(() => passInput.classList.remove('bad'), 400);
+    lockErr.textContent = 'Wrong passcode.';
+    passInput.value = '';
+    passInput.focus();
+  }
+});
+
+$('lockBtn').onclick = showLock;
+
+/* ---------- Touch ID / Face ID (WebAuthn) ---------- */
+/*
+   How it works, in plain words:
+     · Turning it on asks the browser to make a key pair on your device and
+       keep the private half inside the Secure Enclave — it can never leave,
+       and this page never sees it. Only the public half is kept, here, so the
+       page can recognise it later.
+     · Unlocking sends a random challenge; your iPad answers it only after a
+       successful Touch ID / Face ID scan. No passcode, nothing typed.
+     · The passcode stays as a backup. Keep it — if you lose the iPad, the
+       fingerprint is gone with it.
+   Needs https (GitHub Pages gives you that) and Safari on iPadOS 14+.
+*/
+
+let bioOK = false;   // does this browser expose Touch ID / Face ID to the web?
+
+function b64u(buf) {
+  const bytes = new Uint8Array(buf);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function unb64u(str) {
+  let s = String(str).replace(/-/g, '+').replace(/_/g, '/');
+  while (s.length % 4) s += '=';
+  const bin = atob(s);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+function randBytes(n) {
+  const a = new Uint8Array(n);
+  crypto.getRandomValues(a);
+  return a;
+}
+
+// Cached at start-up so the click handler can call WebAuthn straight away —
+// Safari only shows the fingerprint prompt when it comes from a real tap.
+async function detectBio() {
+  try {
+    return !!(window.PublicKeyCredential &&
+              await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable());
+  } catch (e) {
+    return false;
+  }
+}
+
+function bioLabel() {
+  // iPads have Touch ID or Face ID depending on the model; say both.
+  return 'Touch ID / Face ID';
+}
+
+async function bioEnroll() {
+  const publicKey = {
+    challenge: randBytes(32),
+    rp: { name: 'My Links' },                       // rp.id defaults to this site's domain
+    user: { id: randBytes(16), name: 'owner', displayName: 'Me' },
+    pubKeyCredParams: [
+      { type: 'public-key', alg: -7 },              // ES256
+      { type: 'public-key', alg: -257 },            // RS256
+    ],
+    authenticatorSelection: {
+      authenticatorAttachment: 'platform',          // the iPad itself, not a USB key
+      userVerification: 'required',                 // insist on fingerprint / face
+      residentKey: 'preferred',
+      requireResidentKey: false,
+    },
+    timeout: 120000,
+    attestation: 'none',
+  };
+  const existing = store.getItem(BIO_KEY);
+  if (existing) {
+    try { publicKey.excludeCredentials = [{ id: unb64u(existing), type: 'public-key' }]; } catch (e) {}
+  }
+
+  const cred = await navigator.credentials.create({ publicKey });
+  if (!cred || !cred.rawId) throw new Error('no credential returned');
+  store.setItem(BIO_KEY, b64u(cred.rawId));
+}
+
+async function bioVerify() {
+  const base = {
+    challenge: randBytes(32),
+    timeout: 120000,
+    userVerification: 'required',
+  };
+  const stored = store.getItem(BIO_KEY);
+  let cred = null;
+
+  if (stored) {
+    try {
+      cred = await navigator.credentials.get({
+        publicKey: Object.assign({ allowCredentials: [{ id: unb64u(stored), type: 'public-key' }] }, base),
+      });
+    } catch (e) {
+      if (e && e.name !== 'NotAllowedError') throw e;
+      cred = null;                                  // try once more without the id
+    }
+  }
+
+  // Also covers a wiped localStorage: Apple keeps these as discoverable
+  // credentials, so the iPad can still find the one it made earlier.
+  if (!cred) {
+    cred = await navigator.credentials.get({ publicKey: base });
+  }
+
+  if (!cred || !cred.rawId) throw new Error('no credential returned');
+  store.setItem(BIO_KEY, b64u(cred.rawId));         // remember it for next time
+}
+
+function secSay(text, kind) {
+  secMsg.textContent = text || '';
+  secMsg.className = 'msg' + (kind ? ' ' + kind : '');
+}
+
+function paintLockScreen() {
+  const ready = bioOK && !!store.getItem(BIO_KEY);
+  bioSep.hidden = !ready;
+  bioUnlockBtn.hidden = !ready;
+  $('bioUnlockLabel').textContent = bioLabel();
+  bioUnlockBtn.disabled = false;
+}
+
+function paintSecPanel() {
+  const enrolled = !!store.getItem(BIO_KEY);
+  bioSetupBtn.hidden = !bioOK || enrolled;
+  bioOffBtn.hidden = !enrolled;
+  $('secBtn').classList.toggle('on', enrolled);
+
+  bioState.innerHTML = '';
+  const b = document.createElement('b');
+  if (!bioOK) {
+    b.textContent = 'Not available here';
+    bioState.append(b, document.createTextNode(' — this browser cannot use Touch ID / Face ID for web pages. Use the passcode.'));
+    $('secDesc').textContent = 'Touch ID / Face ID needs Safari on iPadOS 14 or later, over https.';
+  } else if (enrolled) {
+    b.textContent = 'On';
+    bioState.append(b, document.createTextNode(' — a fingerprint/face key for this page is set up on this device.'));
+    $('secDesc').textContent = 'Tap the fingerprint button on the lock screen to open the page without typing.';
+  } else {
+    b.textContent = 'Off';
+    bioState.append(b, document.createTextNode(' — tap Turn on, then scan your fingerprint or face when asked.'));
+    $('secDesc').textContent = 'Unlock this page with your fingerprint or face instead of typing the passcode.';
+  }
+  paintLockScreen();
+}
+
+bioSetupBtn.onclick = () => {
+  secSay('');
+  bioSetupBtn.disabled = true;
+  // bioEnroll() reaches navigator.credentials.create() synchronously inside
+  // this tap, which Safari needs before it will show the fingerprint prompt.
+  bioEnroll()
+    .then(() => { secSay('Done. Lock the page and try the fingerprint button.', 'ok'); paintSecPanel(); })
+    .catch(err => secSay(bioErrorText(err), 'bad'))
+    .finally(() => { bioSetupBtn.disabled = false; });
+};
+
+bioOffBtn.onclick = () => {
+  store.removeItem(BIO_KEY);
+  secSay('Turned off on this device. The passcode still works.', 'ok');
+  paintSecPanel();
+};
+
+bioUnlockBtn.onclick = () => {
+  lockErr.textContent = '';
+  bioUnlockBtn.disabled = true;
+  bioVerify()
+    .then(() => { unlock(); paintSecPanel(); })
+    .catch(err => {
+      lockErr.textContent = bioErrorText(err);
+      passInput.focus();
+    })
+    .finally(() => { bioUnlockBtn.disabled = false; });
+};
+
+function bioErrorText(err) {
+  const name = (err && err.name) || '';
+  if (name === 'NotAllowedError') return 'Scan cancelled. Use the passcode.';
+  if (name === 'NotSupportedError') return 'This browser does not support that. Use the passcode.';
+  if (name === 'SecurityError') return 'Blocked by the browser. Reload and try again.';
+  return 'That did not work. Use the passcode.';
+}
+
+secBtn.onclick = () => {
+  secPanel.classList.toggle('open');
+  if (secPanel.classList.contains('open')) paintSecPanel();
+};
+
+/* ---------- make a new passcode hash ---------- */
+
+$('hashBtn').onclick = () => {
+  const out = $('hashOut');
+  const val = $('newPass').value;
+  if (!val.trim()) { secSay('Type a passcode first.', 'bad'); return; }
+  out.hidden = false;
+  out.textContent = "const PASS_HASH = '" + hashPass(val) + "';";
+  $('newPass').value = '';
+  secSay('Replace the PASS_HASH line in index.html with the one below, then commit.', 'ok');
+};
+
+/* ---------- start ---------- */
+
+let recovered = 0;
+
+(async function start() {
+  // Probe Touch ID support at the same time as the storage is read, so the
+  // Security panel never shows a wrong "not available" first.
+  const [fixed, bio] = await Promise.all([load(), detectBio()]);
+  recovered = fixed;
+  bioOK = bio;
+  if (recovered) pendingNote = 'Restored ' + recovered + ' link' + (recovered === 1 ? '' : 's') + ' from this browser\u2019s backup copy.';
+
+  fillSelect();
+  render();
+  paintSecPanel();
+
+  if (isUnlocked()) unlock(); else showLock();
+})();
+</script>
+</body>
+</html>
